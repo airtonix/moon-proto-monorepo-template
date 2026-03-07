@@ -13,8 +13,6 @@ exe-path = "hk.exe"
 
 [install]
 download-url = "https://github.com/jdx/hk/releases/download/v{version}/{download_file}"
-checksum-file = "hk@{version}.sha256"
-checksum-url = "https://github.com/jdx/hk/releases/download/v{version}/{checksum_file}"
 
 [install.exes.hk]
 exe-path = "hk"
