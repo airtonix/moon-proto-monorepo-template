@@ -3,6 +3,7 @@
 
 # Pin tool versions used in this repo.
 hk = "1.37.0"
+actionlint = "1.7.11"
 bun = "1.3.2"
 go = "1.25.1"
 
@@ -13,3 +14,4 @@ builtin-plugins = ["bun", "go"]
 
 [plugins.tools]
 hk = "file://./proto/plugins/hk.toml"
+actionlint = "file://./proto/plugins/actionlint.toml"

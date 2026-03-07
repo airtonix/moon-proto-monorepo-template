@@ -20,6 +20,12 @@ local linters = new Mapping<String, Step> {
         fix = "python -c \"import json,sys\nfor f in sys.argv[1:]:\n d=json.load(open(f))\n if 'scripts' in d:\n  d.pop('scripts', None)\n  open(f,'w').write(json.dumps(d, indent=2) + '\\n')\" {{files}}"
     }
 
+    // lint changed GitHub workflow files
+    ["actionlint"] {
+        glob = ".github/workflows/*.yml"
+        check = "bash -lc 'ACTIONLINT=\"$(command -v actionlint || proto bin actionlint 2>/dev/null)\"; [ -n \"$ACTIONLINT\" ] || { echo \"ERROR: actionlint is required. Run: proto install actionlint\"; exit 1; }; \"$ACTIONLINT\" {{files}}'"
+    }
+
     // define a custom linter
     ["pkl"] {
         glob = "*.pkl"

@@ -72,7 +72,7 @@ npm test
 ### Git hooks via hk
 
 - Pre-commit hooks run linters and auto-fixers automatically before commit
-- Hooks are configured in `hk.pkl` with linters for ESLint, Prettier, Pkl, and custom rules
+- Hooks are configured in `hk.pkl` with linters for ESLint, Prettier, Actionlint (GitHub workflows), Pkl, and custom rules
 - Run `hk check` to validate, `hk fix` to auto-fix issues
 
 ## Commit conventions
