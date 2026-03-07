@@ -3,6 +3,10 @@ $schema: "https://moonrepo.dev/schemas/project.json"
 language: bash
 
 tasks:
+  dashboard-dev:
+    command: "moon run dashboard:dev"
+    options:
+      runInCI: false
   lint:
     command: "moon run :lint --affected"
   test:
