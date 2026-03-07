@@ -1,0 +1,11 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: bash
+
+tasks:
+  lint:
+    command: "go vet ./..."
+  build:
+    command: "go build ./..."
+  test:
+    command: "go test ./..."

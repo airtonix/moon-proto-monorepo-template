@@ -1,0 +1,12 @@
+# moon
+.moon/cache
+.moon/docker
+
+# node/bun
+**/node_modules/
+
+# build outputs
+**/dist/
+
+# go build artifacts
+pkgs/cli/something/something

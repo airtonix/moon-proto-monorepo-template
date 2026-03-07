@@ -1,0 +1,15 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: typescript
+
+tasks:
+  lint:
+    command: "bunx tsc --noEmit"
+  typecheck:
+    command: "bunx tsc --noEmit"
+  build:
+    command: "bunx tsc -p tsconfig.json"
+    outputs:
+      - "dist"
+  test:
+    command: "bun test"

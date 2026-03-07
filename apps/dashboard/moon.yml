@@ -1,0 +1,19 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: typescript
+
+tasks:
+  dev:
+    command: "bun run dev"
+    options:
+      runInCI: false
+  lint:
+    command: "bun run lint"
+  typecheck:
+    command: "bun run typecheck"
+  build:
+    command: "bun run build"
+    outputs:
+      - "dist"
+  test:
+    command: "bun run test"

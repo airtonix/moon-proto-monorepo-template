@@ -1,0 +1,9 @@
+projects:
+  repo: "."
+  dashboard: "apps/dashboard"
+  hello-lib: "pkgs/libs/hello"
+  something-cli: "pkgs/cli/something"
+
+vcs:
+  defaultBranch: "main"
+  provider: "github"
