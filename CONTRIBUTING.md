@@ -1,165 +1,155 @@
 # Contributing
 
-Thank you for considering contributions to this project! This guide covers our development setup, conventions, and workflow.
+Thank you for your interest in contributing to this project! This guide explains how to set up your development environment, our contribution conventions, and the CI pipeline.
 
 ## Prerequisites
 
-Before you start, ensure you have the following installed globally:
+Before you start, ensure you have:
 
-- **`mise`** — polyglot runtime and task manager
-  - Install: https://mise.jdx.dev/
-- **`moon`** — task orchestration CLI (via `mise use -g --pin github:moonrepo/moon`)
-- **`proto`** — toolchain version management (via `mise use -g --pin github:moonrepo/proto`)
-
-Once installed, `moon` and `proto` will be pinned to the versions we use.
+- **mise** — polyglot runtime manager (install from [mise.jdx.dev](https://mise.jdx.dev))
+- **moon** — task orchestrator (managed by mise)
+- **proto** — toolchain manager (managed by mise)
 
 ## Setup
 
-After cloning, run the setup sequence:
+1. **Clone the repo and install tools:**
+   ```bash
+   git clone <repo-url>
+   cd <repo-name>
+   ```
 
+2. **Install global moon and proto via mise:**
+   ```bash
+   mise use -g --pin github:moonrepo/moon
+   mise use -g --pin github:moonrepo/proto
+   ```
+
+3. **Install project tools and setup:**
+   ```bash
+   proto install
+   hk install
+   moon run :setup
+   ```
+
+   This will:
+   - Install all pinned tool versions (from `.prototools` and `.proto/`)
+   - Set up git hooks via `hk` (linters, formatters)
+   - Run project-specific setup tasks
+
+4. **Verify everything works:**
+   ```bash
+   moon run :lint
+   moon run :test
+   moon run :build
+   ```
+
+## Development Conventions
+
+### Use Moon tasks, not npm scripts
+
+- **All project work** must go through `moon run` commands
+- This repo uses the `no-package-scripts` linter to enforce this in `pkgs/*` (libraries and CLI tools)
+- Apps in `apps/*` may proxy scripts through moon tasks for convenience
+- See `moon.yml` (project root) and per-project `moon.yml` files for available tasks
+
+**Example:**
 ```bash
-proto install    # Install all pinned tools from .prototools
-hk install       # Install git hooks
-moon run :setup  # Run the setup task (installs project dependencies)
+# ✅ Correct
+moon run :lint
+moon run :test
+
+# ❌ Avoid
+npm run lint
+npm test
 ```
 
-This will:
-- Download and pin tool versions (hk, bun, go, etc.)
-- Configure git pre-commit hooks for linting and formatting
-- Install JavaScript/TypeScript dependencies via Bun
-- Prepare your workspace
+### Proto for tool pinning
 
-## Conventions
-
-### Task orchestration: Use `moon run`
-
-All project tasks are defined in `moon.yml` files and orchestrated via `moon`:
-
-```bash
-moon run :lint       # Lint all projects
-moon run :test       # Run all tests
-moon run :build      # Build all projects
-moon run :typecheck  # Type-check all TypeScript
-```
-
-**Why?** Moon provides a unified task interface, caching, parallel execution, and correct dependency ordering across the monorepo.
-
-### Package.json scripts
-
-- **In `pkgs/*` (libraries/tools):** No `scripts` field. The `no-package-scripts` linter in `hk.pkl` enforces this.
-- **In `apps/*` (applications):** Scripts are allowed and may proxy to `moon` tasks (e.g., `"dev": "moon run app:dev"`).
-
-If you need to add a task, define it in the project's `moon.yml` file instead.
-
-### Tool versions via proto
-
-All tool versions are pinned in `.prototools` and installed by `proto install`:
-
-```
-hk = "1.37.0"      # git hooks
-bun = "1.3.2"      # package manager / runtime
-go = "1.25.1"      # go compiler
-```
-
-To update a tool, modify `.prototools` and run `proto install`.
-
-Custom plugins (e.g., `hk`) are stored in `proto/plugins/` and referenced in `.prototools`.
+- All tool versions are declared in `.prototools` and managed by proto
+- Custom plugins are in `proto/plugins/` (e.g., `hk.toml` for git hooks)
+- Run `proto install` to fetch and cache tool versions
 
 ### Git hooks via hk
 
-Pre-commit hooks are configured in `hk.pkl` and managed by `hk`:
+- Pre-commit hooks run linters and auto-fixers automatically before commit
+- Hooks are configured in `hk.pkl` with linters for ESLint, Prettier, Pkl, and custom rules
+- Run `hk check` to validate, `hk fix` to auto-fix issues
 
-- **ESLint** — Lints TypeScript files
-- **Prettier** — Formats code
-- **Pkl** — Validates `.pkl` files
-- **no-package-scripts** — Enforces moon task convention
+## Commit conventions
 
-**Before commit:** `hk` automatically runs fixers (`fix = true`) and stashes unstaged changes.
-
-**Manual checks:**
-```bash
-hk check   # Validate all linters
-hk fix     # Auto-fix all linters
-```
-
-## Commits and pull requests
-
-### Commit format
-
-This repo enforces [Conventional Commits](https://www.conventionalcommits.org/):
+This project uses **semantic commit messages** (enforced by `pr-title.yml`):
 
 ```
-feat(scope): short description
-fix(scope): short description
-docs(readme): update setup instructions
-test(utils): add edge case tests
-refactor(cli): simplify parsing logic
+<type>(<scope>): <description>
+
+<body>
+
+Closes #<issue>
 ```
 
-PR title validation is enforced by `.github/workflows/pr-title.yml`. Commits are squashed on merge, so focus on PR titles.
+**Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
 
-### Before pushing
+**Example:**
+```
+feat(dashboard): add dark mode toggle
 
-1. Run `hk fix` to auto-format and fix issues
-2. Run `moon run :lint` and `moon run :test` to validate your changes
-3. If applicable, update `README.md` or `CONTRIBUTING.md`
+Adds a new theme selector to the dashboard UI and persists 
+user preference to localStorage.
 
-## CI/CD pipeline
-
-Our GitHub Actions workflows enforce quality and automate releases:
-
-### `pr.yml` — PR checks
-- **Triggers:** On `pull_request` events
-- **Validates:**
-  - PR title follows Conventional Commits
-  - Code passes linting (`moon run :lint`)
-  - Tests pass (`moon run :test`)
-  - TypeScript compiles (`moon run :typecheck`)
-
-### `release.yml` — Automated versioning and release notes
-- **Triggers:** On `push` to `master`
-- **Actions:**
-  - Runs `release-please` to generate release notes and bump version based on commit history
-  - Creates a release PR (or updates if open)
-  - When merged, publishes the release
-
-### `publish.yml` — Publish artifacts
-- **Triggers:** On GitHub `release` events
-- **Actions:**
-  - Publishes packages to registries (npm, etc.)
-  - Builds and tags Docker images (if applicable)
-
-## Troubleshooting
-
-### Hook failing but you disagree?
-
-If a hook is too strict, you can:
-
-1. **Bypass temporarily:** `git commit --no-verify` (use sparingly)
-2. **Report an issue:** Discuss in our issue tracker
-3. **Update `hk.pkl`:** If the rule is wrong, propose a fix
-
-### Tool version mismatch
-
-If you see "version mismatch" errors:
-
-```bash
-proto install --clean  # Re-download and install all tools
+Closes #42
 ```
 
-### Tests failing locally but passing in CI
+## CI Pipeline
 
-This usually means a version mismatch. Ensure:
+The project has three GitHub Actions workflows:
 
-```bash
-proto install
-bun install
-moon run :test
-```
+### 1. **PR checks** (`.github/workflows/pr.yml`)
+
+Runs on every pull request:
+- Sets up mise, moon, and proto
+- Runs `moon run :lint` — code style and quality checks
+- Runs `moon run :test` — unit and integration tests
+- Runs `moon run :build` — compilation and bundling
+
+**Must pass before merging.**
+
+### 2. **Release** (`.github/workflows/release.yml`)
+
+Triggers when you push to `master`:
+- Uses [Release Please](https://github.com/google-github-actions/release-please-action) for automated versioning
+- Analyzes commit messages to determine version bumps (major.minor.patch)
+- Creates release PRs and publishes GitHub releases
+- Dispatches publish workflow when a release is created
+
+### 3. **Publish** (`.github/workflows/publish.yml`)
+
+Triggered by the release workflow:
+- Installs tools and builds the project
+- Publishes to npm with OIDC authentication
+- Uses the tag from release workflow (latest or next)
+
+## Review process
+
+1. Create a feature branch from `master`
+2. Make your changes, commit with semantic messages
+3. Push and open a pull request
+4. Ensure PR title follows semantic format (e.g., `feat: add new feature`)
+5. Address any CI failures or review comments
+6. Once approved and CI passes, your PR will be merged to `master`
+7. The release workflow automatically creates releases and publishes to npm
+
+## Project structure
+
+- **`apps/`** — runnable applications
+- **`pkgs/`** — publishable and internal packages
+- **`.moon/`** — moon workspace configuration
+- **`.prototools`** — toolchain version pinning
+- **`proto/`** — custom proto plugins
+- **`.github/workflows/`** — CI/CD pipelines
 
 ## Questions?
 
-- Check the **README.md** for project layout and quick examples
-- Review **`.moon/workspace.yml`** for global moon config
-- Check **`hk.pkl`** for hook configuration
-- Ask in an issue or discussion thread
+If you have questions, feel free to:
+- Open an issue for bugs or feature requests
+- Check existing issues and discussions
+- Review the main `README.md` for project overview
