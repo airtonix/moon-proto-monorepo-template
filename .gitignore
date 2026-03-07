@@ -13,3 +13,6 @@ pkgs/cli/something/something
 
 # local pi messenger artifacts
 .pi/messenger/
+moon-proto-template-smoke-test
+moon-proto-template-smoke-test-2
+moon-proto-template-smoke-test-3
