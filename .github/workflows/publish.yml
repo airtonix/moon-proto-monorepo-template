@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'npm tag (latest or next)'
+        description: "npm tag (latest or next)"
         required: true
         type: choice
         options:
@@ -20,27 +20,23 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: jdx/mise-action@d6e32c1796099e0f1f3ac741c220a8b7eae9e5dd
-        with:
-          install: true
-          cache: true
-          experimental: true
-
-      - name: Build
-        run: |
-          mise use -g --pin github:moonrepo/moon
-          mise use -g --pin github:moonrepo/proto
-
-          proto install
-          moon run :build
-
       - id: inputs
-        uses: simenandre/setup-inputs@v1
+        uses: simenandre/setup-inputs@00a2f5d3135898b400343ff87d99b7841e6e4592 # v1
 
-      - name: Publish to npm with OIDC
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Setup Toolchain
+        uses: moonrepo/setup-toolchain@8794f0318b9df4a43a5ddc23cefd16f595b423dd # v0
+        with:
+          auto-install: true
+          auto-setup: true
+
+      - name: Publish Affected Items
         run: |
           TAG="${{ steps.inputs.outputs.tag }}"
           if [ -z "$TAG" ]; then
