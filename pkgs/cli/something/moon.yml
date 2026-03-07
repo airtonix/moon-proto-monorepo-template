@@ -10,6 +10,6 @@ tasks:
   test:
     command: "go test ./..."
   publish:
-    command: |
+    script: |
       TAG="${1:-latest}"
       echo "TODO: publish something-cli release artifacts with tag ${TAG}"
