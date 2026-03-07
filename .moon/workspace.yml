@@ -5,5 +5,5 @@ projects:
   something-cli: "pkgs/cli/something"
 
 vcs:
-  defaultBranch: "main"
+  defaultBranch: "master"
   provider: "github"
