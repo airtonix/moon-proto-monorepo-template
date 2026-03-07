@@ -13,3 +13,7 @@ tasks:
       - "dist"
   test:
     command: "bun test"
+  publish:
+    command: |
+      TAG="${1:-latest}"
+      echo "TODO: publish @template/hello with tag ${TAG}"

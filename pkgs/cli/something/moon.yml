@@ -9,3 +9,7 @@ tasks:
     command: "go build ./..."
   test:
     command: "go test ./..."
+  publish:
+    command: |
+      TAG="${1:-latest}"
+      echo "TODO: publish something-cli release artifacts with tag ${TAG}"

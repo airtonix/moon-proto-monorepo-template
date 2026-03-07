@@ -3,8 +3,6 @@ $schema: "https://moonrepo.dev/schemas/project.json"
 language: bash
 
 tasks:
-  setup:
-    command: bun install
   lint:
     command: "moon run :lint --affected"
   test:

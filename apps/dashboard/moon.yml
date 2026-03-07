@@ -17,3 +17,7 @@ tasks:
       - "dist"
   test:
     command: "bun run test"
+  publish:
+    command: |
+      TAG="${1:-latest}"
+      echo "Dashboard app is not publishable (tag ${TAG})."
