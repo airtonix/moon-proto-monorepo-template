@@ -2,6 +2,9 @@ $schema: "https://moonrepo.dev/schemas/project.json"
 
 language: typescript
 
+toolchains:
+  default: ["javascript", "bun"]
+
 tasks:
   lint:
     command: "bunx tsc --noEmit"
