@@ -27,10 +27,27 @@ mise use -g --pin github:moonrepo/proto
 - `.moon/` + `moon.yml` — moon workspace/project task config
 - `.prototools` + `proto/` — project toolchain versions and plugins
 
+## Proto toolchain
+
+This repo uses **proto** to pin and manage tool versions. Tools are defined in `.prototools` and custom plugins in `proto/plugins/`.
+
+### Custom plugins
+
+- **`hk`** (`proto/plugins/hk.toml`) — Git hook manager for linting and formatting
+  - Configured in `hk.pkl` with linters: ESLint, Prettier, Pkl, and custom `no-package-scripts` rule
+  - Run `hk fix` to auto-fix linter issues, `hk check` to validate
+
+### Conventions
+
+- **Moon tasks over npm scripts**: Use `moon run` for all project tasks. The `no-package-scripts` linter enforces this in `pkgs/*` (libraries/tools). Apps may proxy scripts through moon tasks.
+- **Proto for tool pinning**: All tool versions are declared in `.prototools` and auto-installed by `proto install`.
+- **Git hooks via hk**: Pre-commit hooks run linters and fixers automatically before commit. Configure in `hk.pkl`.
+
 ## Quick start
 
 ```bash
 proto install
+hk install
 moon run :setup
 moon run :lint
 moon run :test
