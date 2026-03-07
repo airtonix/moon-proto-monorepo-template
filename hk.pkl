@@ -13,8 +13,9 @@ local linters = new Mapping<String, Step> {
     ["prettier"] = Builtins.prettier
 
     // enforce moon tasks by disallowing package.json scripts
+    // Convention: pkgs/* must use moon tasks; apps/* may have scripts (moon proxies to them)
     ["no-package-scripts"] {
-        glob = "**/package.json"
+        glob = "pkgs/**/package.json"
         check = "python -c \"import json,sys; bad=[]\nfor f in sys.argv[1:]:\n d=json.load(open(f))\n if 'scripts' in d: bad.append(f)\nprint('ERROR: scripts field is forbidden in package.json (use moon tasks):\\n' + '\\n'.join(bad)) if bad else None\nsys.exit(1 if bad else 0)\" {{files}}"
         fix = "python -c \"import json,sys\nfor f in sys.argv[1:]:\n d=json.load(open(f))\n if 'scripts' in d:\n  d.pop('scripts', None)\n  open(f,'w').write(json.dumps(d, indent=2) + '\\n')\" {{files}}"
     }
