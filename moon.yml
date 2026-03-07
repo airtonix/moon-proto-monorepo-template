@@ -7,6 +7,8 @@ tasks:
     command: "moon run dashboard:dev"
     options:
       runInCI: false
+  clean:
+    command: "moon clean"
   lint:
     command: "moon run :lint --affected"
   test:
