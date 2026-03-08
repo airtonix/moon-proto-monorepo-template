@@ -11,8 +11,3 @@
 **/dist/
 **/.artifacts/
 
-# go build artifacts
-pkgs/cli/something/something
-
-# local pi messenger artifacts
-.pi/messenger/
