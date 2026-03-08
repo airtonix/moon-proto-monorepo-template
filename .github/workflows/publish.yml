@@ -61,8 +61,8 @@ jobs:
           fi
 
           projects_json="$(moon projects --json)"
-          if ! jq -e --arg target "${PUBLISH_TARGET}" '.[] | select(.name == $target)' >/dev/null <<<"${projects_json}"; then
-            valid_targets="$(jq -r '.[].name' <<<"${projects_json}" | sort | paste -sd ', ' -)"
+          if ! jq -e --arg target "${PUBLISH_TARGET}" '.[] | select(.id == $target)' >/dev/null <<<"${projects_json}"; then
+            valid_targets="$(jq -r '.[].id' <<<"${projects_json}" | sort | paste -sd ', ' -)"
 
             echo "ERROR: Unknown PUBLISH_TARGET '${PUBLISH_TARGET}'." >&2
             echo "Valid targets: ${valid_targets}" >&2
