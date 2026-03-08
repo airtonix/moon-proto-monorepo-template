@@ -9,6 +9,34 @@ bun install
 bun --bun run dev
 ```
 
+## Moon tasks and Cloudflare Pages deploy
+
+Use moon tasks from the repo root:
+
+```bash
+# build static assets
+moon run dashboard:build
+
+# package Pages artifact (.artifacts/pages + .artifacts/dashboard-<tag>.tgz)
+moon run dashboard:package -- latest
+
+# dry-run publish (package only, no deploy)
+DEPLOY=false moon run dashboard:publish -- latest
+
+# real publish (requires Cloudflare env vars)
+moon run dashboard:publish -- latest
+```
+
+Required env vars for real deploy:
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN` (or `CLOUDFLARE_OIDC_TOKEN`)
+- `CF_PAGES_PROJECT_NAME`
+
+Branch mapping by tag:
+- `latest` → `${CF_PAGES_PRODUCTION_BRANCH:-master}`
+- `next` → `${CF_PAGES_PREVIEW_BRANCH:-next}`
+- any other tag → that tag value as Pages branch name
+
 # Building For Production
 
 To build this application for production:

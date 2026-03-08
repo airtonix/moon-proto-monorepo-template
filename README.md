@@ -48,7 +48,6 @@ This repo uses **proto** to pin and manage tool versions. Tools are defined in `
 ```bash
 proto install
 hk install
-moon run :setup
 moon run :lint
 moon run :test
 moon run :build
@@ -67,7 +66,108 @@ bun --cwd pkgs/libs/hello test
 cd pkgs/cli/something && go run . greet world
 ```
 
+## Publish contracts
+
+- `dashboard` (TanStack Start app) → Cloudflare Pages
+- `docs-site` (TanStack static docs scaffold) → GitHub Pages (`https://airtonix.github.io/moon-proto-monorepo-template/`)
+- `api-service` (service target) → Cloudflare Workers (not GitHub Pages); supports preview/staging/production and dry-run/no-deploy mode
+- `something-cli` (Go CLI) → release binaries attached to GitHub releases
+- `hello-lib` (Bun package) → GitHub Packages registry
+- `counter-lib` (Bun package) → internal-only (`private: true`), package/publish are explicit no-op success
+
+Root orchestration commands:
+
+```bash
+# package all allowed targets
+moon run repo:package
+
+# publish all allowed targets with a tag/channel
+PUBLISH_TARGET=all PUBLISH_TAG=latest moon run repo:publish
+
+# publish a single target
+PUBLISH_TARGET=hello-lib PUBLISH_TAG=latest moon run repo:publish
+
+# unknown target exits non-zero
+PUBLISH_TARGET=not-a-target PUBLISH_TAG=latest moon run repo:publish
+```
+
+Lightweight smoke verification (router hardening):
+
+```bash
+# all mode still works
+PUBLISH_TARGET=all PUBLISH_TAG=latest moon run repo:package
+
+# single-target mode still works
+PUBLISH_TARGET=hello-lib PUBLISH_TAG=latest moon run repo:publish
+
+# unknown targets must fail (non-zero)
+if PUBLISH_TARGET=not-a-target PUBLISH_TAG=latest moon run repo:publish; then
+  echo "expected failure for unknown target" >&2
+  exit 1
+fi
+```
+
+## GitHub Packages publish configuration (hello-lib)
+
+`hello-lib` publishes to `https://npm.pkg.github.com` and accepts `latest`, `next`, or `vX.Y.Z` tags.
+
+Local publish requirements:
+
+- `NODE_AUTH_TOKEN` (preferred), or `GITHUB_TOKEN`/`GH_TOKEN`
+- Package scope in `pkgs/libs/hello/package.json` should match the GitHub owner when publishing with `GITHUB_TOKEN`
+
+Examples:
+
+```bash
+# verify package contents and metadata without publishing
+moon run hello-lib:package -- latest
+
+# publish with a channel tag
+NODE_AUTH_TOKEN=ghp_xxx moon run hello-lib:publish -- next
+```
+
+## GitHub release assets publish workflow (something-cli)
+
+Use `.github/workflows/publish-github-release-assets.yml` to upload `something-cli` archives to GitHub releases.
+This workflow is for release assets only (not npm/GitHub Packages publishing).
+
+Required:
+- GitHub token (`github.token`, exposed as `GH_TOKEN` in workflow)
+- Input tag (`latest|next|vX.Y.Z`)
+
+## Cloudflare Pages publish configuration (dashboard)
+
+Required for real dashboard deploys (`moon run dashboard:publish -- <tag>` and `.github/workflows/publish-cloudflare-pages.yml`):
+
+- GitHub **secret**: `CLOUDFLARE_ACCOUNT_ID`
+- GitHub **secret**: `CLOUDFLARE_API_TOKEN` (or `CLOUDFLARE_OIDC_TOKEN`)
+- GitHub **repository variable**: `CF_PAGES_PROJECT_NAME`
+
+Optional repository variables:
+
+- `CF_PAGES_PRODUCTION_BRANCH` (default: `master`, used for `tag=latest`)
+- `CF_PAGES_PREVIEW_BRANCH` (default: `next`, used for `tag=next`)
+
+Dry-run without deploy:
+
+```bash
+DEPLOY=false moon run dashboard:publish -- latest
+```
+
+## Cloudflare Workers publish configuration (api-service)
+
+Required for real Worker deploys (`moon run api-service:publish -- <tag> <environment>` and `.github/workflows/publish-cloudflare-workers.yml`):
+
+- GitHub **secret**: `CLOUDFLARE_ACCOUNT_ID`
+- GitHub **secret**: `CLOUDFLARE_API_TOKEN` (or `CLOUDFLARE_OIDC_TOKEN`)
+
+Optional:
+- GitHub **repository variable**: `CF_WORKER_ROUTES`
+
+The workflow supports manual dry-run (`deploy=false`) and deploy mode per Wrangler environment (`preview|staging|production`).
+
 ## Notes
 
 - CI installs global `moon` + `proto`, then runs `proto install` and `moon` tasks.
+- CI and publish workflows enforce that `counter-lib` remains internal-only (`private: true`) and that its package/publish tasks are noop guardrails.
 - `pkgs/cli/something` demonstrates a Go project living cleanly beside Bun/TS projects in one repo.
