@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#USAGE flag "-v --version <version>" help="Deploy the specified version"
+#USAGE flag "-m --mode <mode>" help="The release mode to set" {
+#USAGE   choices  "hotfix" "new-release" "dev"
+#USAGE }
+#USAGE arg "<appname>" help="Build with the specified app" {
+#USAGE   choices "payroll" "platform" "portal"
+#USAGE }
+
+
+# shellcheck disable=SC2154
+echo "$usage_mode deployment of $usage_appname@$usage_version"

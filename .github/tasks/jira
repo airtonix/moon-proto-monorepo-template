@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+
+JIRA_API_TOKEN="DEADBEEF" \
+    jira "$@"

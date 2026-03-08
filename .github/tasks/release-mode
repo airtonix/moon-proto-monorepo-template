@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# This script will modify the .release-please-config.json to manipulate the 
+#    versioning-strategy
+
+#USAGE flag "-m --mode <mode>" help="The release mode to set" {
+#USAGE   choices  "hotfix" "new-release"
+#USAGE }
+
+# if not mode is set fail
+
+function set_versioning_strategy() {
+  local mode=$1
+  local config_file=".release-please-config.json"
+  local versioning_strategy="always-bump-minor"
+
+  if [ "$mode" == "hotfix" ]; then
+    versioning_strategy=" always-bump-patch"
+  fi
+
+  jq ".versioning = \"$versioning_strategy\"" $config_file > tmp.$$.json && mv tmp.$$.json $config_file
+}
+
+
+# shellcheck disable=SC2154
+set_versioning_strategy "$usage_mode"
