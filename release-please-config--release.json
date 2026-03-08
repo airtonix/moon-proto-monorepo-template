@@ -1,0 +1,27 @@
+{
+  "separate-pull-requests": true,
+  "versioning": "always-bump-minor",
+  "bump-patch-for-minor-pre-major": true,
+  "release-type": "node",
+  "packages": {
+    "apps/food-carts": {
+      "group": "apps"
+    },
+    "apps/back-office": {
+      "group": "apps"
+    },
+    "apps/public-website": {
+      "group": "apps"
+    }
+  },
+  "plugins": [
+    {
+      "type": "node-workspace"
+    },
+    {
+      "type": "group-priority",
+      "groups": ["apps"]
+    }
+  ],
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
