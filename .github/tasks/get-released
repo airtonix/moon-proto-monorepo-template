@@ -9,12 +9,12 @@ cmd_help() {
 	cat <<'EOF'
 Usage:
   get-released help
-  get-released manifest <release_please_json_payload>
+  get-released manifest <release_please_json_payload> [mode] [tag]
   get-released appnames <release_please_json_payload>
 
 Commands:
   help      Show this help
-  manifest  Output Record<{ tag_name: string, version: string }>
+  manifest  Output publish matrix [{ target, tag, mode, version }]
   appnames  Output string[] of released app names
 EOF
 }
@@ -35,9 +35,11 @@ require_payload() {
 
 cmd_to_manifest() {
 	local payload="${1:-}"
+	local mode="${2:-normal}"
+	local tag="${3:-latest}"
 	require_payload "$payload"
 
-	jq -cn --argjson data "$payload" '
+	jq -cn --argjson data "$payload" --arg mode "$mode" --arg tag "$tag" '
     def released_paths:
       if ($data.paths_released | type) == "string" then
         ($data.paths_released | fromjson? // [])
@@ -47,13 +49,13 @@ cmd_to_manifest() {
         []
       end;
 
-    reduce released_paths[] as $path (
-      {};
-      .[$path] = {
-        tag_name: ($data[($path + "--tag_name")] // ""),
-        version: ($data[($path + "--version")] // "")
-      }
-    )
+    released_paths
+      | map({
+          target: (split("/")[-1]),
+          tag: $tag,
+          mode: $mode,
+          version: ($data[(. + "--version")] // "")
+        })
   '
 }
 
@@ -80,7 +82,7 @@ main() {
 
 	case "$subcmd" in
 	manifest)
-		cmd_to_manifest "${2:-}"
+		cmd_to_manifest "${2:-}" "${3:-}" "${4:-}"
 		;;
 	appnames)
 		cmd_to_appnames "${2:-}"

@@ -19,11 +19,11 @@ setup() {
   [[ "$output" == *"Usage:"* ]]
 }
 
-@test "get-released manifest outputs Record<{ tag_name: string, version: string }>" {
-  run bash "$SCRIPT" manifest "$PAYLOAD"
+@test "get-released manifest outputs publish matrix entries" {
+  run bash "$SCRIPT" manifest "$PAYLOAD" hotfix next
   [ "$status" -eq 0 ]
 
-  run jq -e '. == {"apps/back-office": {"tag_name": "back-office-v1.0.0", "version": "1.0.0"}}' <<<"$output"
+  run jq -e '. == [{"target":"back-office","tag":"next","mode":"hotfix","version":"1.0.0"}]' <<<"$output"
   [ "$status" -eq 0 ]
 }
 

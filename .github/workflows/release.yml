@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
-      publish_matrix: ${{ steps.publish-matrix.outputs.package_names }}
+      publish_matrix: ${{ steps.publish-matrix.outputs.publish_matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          mode="$(.github/tasks/get-release-mode)"
+          mode="$(.github/tasks/get-release-mode "${GITHUB_REF_NAME}")"
 
           case "${mode}" in
             hotfix)
@@ -57,10 +57,17 @@ jobs:
           skip-github-pull-request: false
 
       - id: publish-matrix
-        env:
-          PATHS_RELEASED: ${{ steps.release-please.outputs.paths_released || '[]' }}
         run: |
-          publish_matrix=$(./github/tasks/get-released appnames "${{ needs.Process.outputs.outputs }}" | jq -rc ".")
+          set -euo pipefail
+
+          release_payload='${{ toJson(steps.release-please.outputs) }}'
+          mode='${{ steps.mode.outputs.mode }}'
+          tag="next"
+          if [ '${{ steps.release-please.outputs.releases_created }}' = 'true' ]; then
+            tag="latest"
+          fi
+
+          publish_matrix="$(.github/tasks/get-released manifest "${release_payload}" "${mode}" "${tag}" | jq -rc '.')"
           echo "publish_matrix=${publish_matrix}" >> "${GITHUB_OUTPUT}"
 
   publish:
@@ -78,8 +85,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           event-type: publish-package
-          client-payload: '{ "target":"${{ matrix.target }}","tag":"${{ matrix.tag }}", "mode": "${{ matrix.mode }}" }'
-      - name: Create Release Snapshot
-        if: matrix.mode != "hotfix"
-        run: |
-          .github/tasks/create-release-snapshot "${{ matrix.target }}" "${{ matrix.version }}"
+          client-payload: '{"target":"${{ matrix.target }}","tag":"${{ matrix.tag }}","mode":"${{ matrix.mode }}","version":"${{ matrix.version }}"}'
