@@ -1,26 +1,36 @@
-$schema: "https://moonrepo.dev/schemas/project.json"
+$schema: 'https://moonrepo.dev/schemas/project.json'
 
 language: typescript
 
 toolchains:
-  default: ["javascript", "bun"]
+  default: ['javascript', 'bun']
 
 tasks:
   dev:
-    command: "bun run dev"
+    command: 'bun run dev'
     options:
       runInCI: false
   lint:
-    command: "bun run lint"
+    command: 'bun run lint'
   typecheck:
-    command: "bun run typecheck"
+    command: 'bun run typecheck'
   build:
-    command: "bun run build"
+    command: 'bun run build'
     outputs:
-      - "dist"
+      - 'dist'
   test:
-    command: "bun run test"
+    command: 'bun run test'
+
   publish:
     script: |
-      TAG="${1:-latest}"
-      echo "Dashboard app is not publishable (tag ${TAG})."
+      set -euo pipefail
+      echo "dashboard publish skeleton"
+      echo "args: $*"
+      echo "arg1: ${1:-}"
+      echo "arg2: ${2:-}"
+      echo "PUBLISH_TARGET: ${PUBLISH_TARGET:-}"
+      echo "PUBLISH_TAG: ${PUBLISH_TAG:-}"
+    outputs:
+      - '.artifacts'
+    options:
+      cache: false

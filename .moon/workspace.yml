@@ -1,7 +1,10 @@
 projects:
   repo: "."
   dashboard: "apps/dashboard"
+  docs-site: "apps/docs_site"
+  api-service: "apps/api_service"
   hello-lib: "pkgs/libs/hello"
+  counter-lib: "pkgs/libs/counter"
   something-cli: "pkgs/cli/something"
 
 vcs:

@@ -1,7 +1,11 @@
 {
-  "name": "@template/hello",
+  "name": "@template/counter",
   "version": "0.0.1",
-  "description": "Example TypeScript library for the moonrepo/bun template",
+  "private": true,
+  "description": "Internal-only counter library",
+  "publishConfig": {
+    "access": "restricted"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -12,12 +16,9 @@
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "devDependencies": {
-    "@types/node": "^24.6.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@types/node": "^24.6.0"
   }
 }

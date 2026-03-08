@@ -4,12 +4,22 @@ language: go
 
 tasks:
   lint:
-    command: "go vet ./..."
+    script: |
+      unset GOROOT
+      go vet ./...
   build:
-    command: "go build ./..."
+    script: |
+      unset GOROOT
+      go build ./...
   test:
-    command: "go test ./..."
+    script: |
+      unset GOROOT
+      go test ./...
+  package:
+    outputs:
+      - "dist"
+    script: |
+      echo "packaged"
   publish:
     script: |
-      TAG="${1:-latest}"
-      echo "TODO: publish something-cli release artifacts with tag ${TAG}"
+      echo "published"

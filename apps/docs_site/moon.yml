@@ -1,0 +1,21 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: typescript
+
+toolchains:
+  default: ["javascript", "bun"]
+
+tasks:
+  build:
+    command: "bun run build"
+    outputs:
+      - "dist"
+  publish:
+    script: |
+      set -euo pipefail
+      echo "docs-site publish skeleton"
+      echo "args: $*"
+      echo "arg1: ${1:-}"
+      echo "arg2: ${2:-}"
+      echo "PUBLISH_TARGET: ${PUBLISH_TARGET:-}"
+      echo "PUBLISH_TAG: ${PUBLISH_TAG:-}"

@@ -1,0 +1,53 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: typescript
+
+toolchains:
+  default: ["javascript", "bun"]
+
+tasks:
+  build:
+    script: |
+      set -euo pipefail
+
+      FIRST="${1:-}"
+      SECOND="${2:-}"
+      THIRD="${3:-}"
+      case "$FIRST" in
+        all|dashboard|docs-site|api-service|something-cli|hello-lib|counter-lib) FIRST="" ;;
+      esac
+      TAG="${PUBLISH_TAG:-${FIRST:-${SECOND:-latest}}}"
+      DEPLOY_ENV="${THIRD:-${DEPLOY_ENV:-preview}}"
+      OUTDIR=".artifacts/worker"
+
+      rm -rf "$OUTDIR"
+      mkdir -p "$OUTDIR"
+
+      bunx wrangler deploy \
+        --dry-run \
+        --outdir "$OUTDIR" \
+        --env "$DEPLOY_ENV" \
+        --var BUILD_TAG:"$TAG" \
+        --var DEPLOY_ENV:"$DEPLOY_ENV"
+
+      echo "api-service worker bundle staged at apps/api_service/$OUTDIR"
+    outputs:
+      - ".artifacts/worker"
+    options:
+      cache: false
+
+  publish:
+    script: |
+      set -euo pipefail
+      echo "api-service publish skeleton"
+      echo "args: $*"
+      echo "arg1: ${1:-}"
+      echo "arg2: ${2:-}"
+      echo "arg3: ${3:-}"
+      echo "PUBLISH_TARGET: ${PUBLISH_TARGET:-}"
+      echo "PUBLISH_TAG: ${PUBLISH_TAG:-}"
+      echo "DEPLOY_ENV: ${DEPLOY_ENV:-}"
+    outputs:
+      - ".artifacts"
+    options:
+      cache: false

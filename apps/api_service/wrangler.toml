@@ -1,0 +1,30 @@
+name = "home-assistant-borg-api-service"
+main = "src/index.ts"
+compatibility_date = "2026-03-07"
+workers_dev = true
+
+[vars]
+SERVICE_NAME = "api-service"
+DEPLOY_ENV = "preview"
+
+[env.preview]
+workers_dev = true
+[env.preview.vars]
+SERVICE_NAME = "api-service"
+DEPLOY_ENV = "preview"
+
+[env.staging]
+workers_dev = true
+[env.staging.vars]
+SERVICE_NAME = "api-service"
+DEPLOY_ENV = "staging"
+
+[env.production]
+workers_dev = true
+[env.production.vars]
+SERVICE_NAME = "api-service"
+DEPLOY_ENV = "production"
+# Optional explicit routes for production can be configured here, for example:
+# routes = [
+#   { pattern = "api.example.com/*", zone_name = "example.com" }
+# ]
