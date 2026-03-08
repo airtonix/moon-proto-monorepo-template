@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+# Takes a release-please output and
+# extracts information in usable ways.
+
+set -euo pipefail
+
+cmd_help() {
+	cat <<'EOF'
+Usage:
+  get-released help
+  get-released manifest <release_please_json_payload>
+  get-released appnames <release_please_json_payload>
+
+Commands:
+  help      Show this help
+  manifest  Output Record<{ tag_name: string, version: string }>
+  appnames  Output string[] of released app names
+EOF
+}
+
+require_payload() {
+	local payload="${1:-}"
+
+	if [[ -z "$payload" ]]; then
+		echo "Missing JSON payload argument" >&2
+		exit 1
+	fi
+
+	if ! jq -e . >/dev/null 2>&1 <<<"$payload"; then
+		echo "Invalid JSON payload passed as argv[0]" >&2
+		exit 1
+	fi
+}
+
+cmd_to_manifest() {
+	local payload="${1:-}"
+	require_payload "$payload"
+
+	jq -cn --argjson data "$payload" '
+    def released_paths:
+      if ($data.paths_released | type) == "string" then
+        ($data.paths_released | fromjson? // [])
+      elif ($data.paths_released | type) == "array" then
+        $data.paths_released
+      else
+        []
+      end;
+
+    reduce released_paths[] as $path (
+      {};
+      .[$path] = {
+        tag_name: ($data[($path + "--tag_name")] // ""),
+        version: ($data[($path + "--version")] // "")
+      }
+    )
+  '
+}
+
+cmd_to_appnames() {
+	local payload="${1:-}"
+	require_payload "$payload"
+
+	jq -cn --argjson data "$payload" '
+    def released_paths:
+      if ($data.paths_released | type) == "string" then
+        ($data.paths_released | fromjson? // [])
+      elif ($data.paths_released | type) == "array" then
+        $data.paths_released
+      else
+        []
+      end;
+
+    released_paths | map(split("/")[-1])
+  '
+}
+
+main() {
+	local subcmd="${1:-help}"
+
+	case "$subcmd" in
+	manifest)
+		cmd_to_manifest "${2:-}"
+		;;
+	appnames)
+		cmd_to_appnames "${2:-}"
+		;;
+	help)
+		cmd_help
+		;;
+	*)
+		cmd_help
+		;;
+	esac
+}
+
+main "$@"
