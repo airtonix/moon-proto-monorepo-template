@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - release/*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,11 +25,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      - name: PrepareReleasePleaseMode
+        id: mode
+        run: |
+          set -euo pipefail
+
+          mode="$(.github/tasks/get-release-mode)"
+
+          case "${mode}" in
+            hotfix)
+              config_file="release-please-config--hotfix.json"
+              ;;
+            normal)
+              config_file="release-please-config.json"
+              ;;
+            *)
+              echo "Unsupported release mode: ${mode}" >&2
+              exit 1
+              ;;
+          esac
+
+          echo "mode=${mode}" >> "${GITHUB_OUTPUT}"
+          echo "config_file=${config_file}" >> "${GITHUB_OUTPUT}"
+
       - uses: google-github-actions/release-please-action@a017ec70c7f1401744d60197f7577a0c51c8c1cf # v4
         id: release-please
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          config-file: release-please-config.json
+          config-file: ${{ steps.mode.outputs.config_file }}
           manifest-file: .release-please-manifest.json
           skip-github-pull-request: false
 
@@ -36,48 +60,8 @@ jobs:
         env:
           PATHS_RELEASED: ${{ steps.release-please.outputs.paths_released || '[]' }}
         run: |
-          set -euo pipefail
-
-          if ! jq -e . >/dev/null 2>&1 <<<"${PATHS_RELEASED}"; then
-            PATHS_RELEASED='[]'
-          fi
-
-          PATH_TO_TARGET="$(jq -c '.packages // {} | with_entries(.value = .value.component)' release-please-config.json)"
-
-          UNKNOWN="$(jq -cn --argjson released "${PATHS_RELEASED}" --argjson map "${PATH_TO_TARGET}" \
-            '$released | map(select(($map[.] // "") == ""))')"
-
-          if [ "${UNKNOWN}" != '[]' ]; then
-            {
-              echo "## Release → Publish mapping failed"
-              echo
-              echo "One or more released paths are not mapped to moon targets in \`release-please-config.json\`."
-              echo
-              echo "### Unmapped released paths"
-              echo '```json'
-              jq . <<<"${UNKNOWN}"
-              echo '```'
-              echo
-              echo "### Released paths (raw)"
-              echo '```json'
-              jq . <<<"${PATHS_RELEASED}"
-              echo '```'
-              echo
-              echo "### Known path → target mappings from config"
-              echo '```json'
-              jq . <<<"${PATH_TO_TARGET}"
-              echo '```'
-            } >> "${GITHUB_STEP_SUMMARY}"
-
-            echo "ERROR: Unmapped released paths: $(jq -c . <<<"${UNKNOWN}")" >&2
-            echo 'package_names=[]' >> "${GITHUB_OUTPUT}"
-            exit 1
-          fi
-
-          MATRIX="$(jq -cn --argjson released "${PATHS_RELEASED}" --argjson map "${PATH_TO_TARGET}" \
-            '$released | map({ target: $map[.], tag: "latest" })')"
-
-          echo "package_names=${MATRIX}" >> "${GITHUB_OUTPUT}"
+          publish_matrix=$(./github/tasks/get-released appnames "${{ needs.Process.outputs.outputs }}" | jq -rc ".")
+          echo "publish_matrix=${publish_matrix}" >> "${GITHUB_OUTPUT}"
 
   publish:
     needs: process
@@ -94,4 +78,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           event-type: publish-package
-          client-payload: '{"target":"${{ matrix.target }}","tag":"${{ matrix.tag }}"}'
+          client-payload: '{ "target":"${{ matrix.target }}","tag":"${{ matrix.tag }}", "mode": "${{ matrix.mode }}" }'
+      - name: Create Release Snapshot
+        if: matrix.mode != "hotfix"
+        run: |
+          .github/tasks/create-release-snapshot "${{ matrix.target }}" "${{ matrix.version }}"
