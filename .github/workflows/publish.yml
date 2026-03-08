@@ -113,4 +113,4 @@ jobs:
         uses: moonrepo/run-report-action@bfb317b1a2fd5b879d7c14d6d7af6360178fd879 # v1.9.0
         with:
           access-token: ${{ github.token }}
-          skip-comment: 'true'
+          skip-comment: "true"
