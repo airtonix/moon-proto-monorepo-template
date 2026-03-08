@@ -51,3 +51,14 @@ Treat them as reference implementations for:
 - moonrepo configuration patterns.
 
 You **MAY** replace or remove example projects, but you **SHOULD** preserve established structural and operational conventions unless there is a deliberate migration plan.
+
+
+## Required Tools
+
+Not provided by this repo or its tool are two tools you must have.
+
+> In Github CI, these two tools are provided by a specialised action we use.
+> On your local machine you need to install them somehow. Mise, Nix... whatever.
+
+- Proto: A Tool manager. https://moonrepo.dev/docs/proto/install
+- Moon: A monorepo manager. install it with proto.
