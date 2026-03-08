@@ -12,40 +12,86 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   process:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
-      releases_created: ${{ steps.release-please.outputs.releases_created }}
-      prs_created: ${{ steps.release-please.outputs.prs_created }}
+      publish_matrix: ${{ steps.publish-matrix.outputs.package_names }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - uses: google-github-actions/release-please-action@a017ec70c7f1401744d60197f7577a0c51c8c1cf # v4
         id: release-please
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          release-type: node
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
           skip-github-pull-request: false
 
-  dispatch-publish:
+      - id: publish-matrix
+        env:
+          PATHS_RELEASED: ${{ steps.release-please.outputs.paths_released || '[]' }}
+        run: |
+          set -euo pipefail
+
+          if ! jq -e . >/dev/null 2>&1 <<<"${PATHS_RELEASED}"; then
+            PATHS_RELEASED='[]'
+          fi
+
+          PATH_TO_TARGET="$(jq -c '.packages // {} | with_entries(.value = .value.component)' release-please-config.json)"
+
+          UNKNOWN="$(jq -cn --argjson released "${PATHS_RELEASED}" --argjson map "${PATH_TO_TARGET}" \
+            '$released | map(select(($map[.] // "") == ""))')"
+
+          if [ "${UNKNOWN}" != '[]' ]; then
+            {
+              echo "## Release → Publish mapping failed"
+              echo
+              echo "One or more released paths are not mapped to moon targets in \`release-please-config.json\`."
+              echo
+              echo "### Unmapped released paths"
+              echo '```json'
+              jq . <<<"${UNKNOWN}"
+              echo '```'
+              echo
+              echo "### Released paths (raw)"
+              echo '```json'
+              jq . <<<"${PATHS_RELEASED}"
+              echo '```'
+              echo
+              echo "### Known path → target mappings from config"
+              echo '```json'
+              jq . <<<"${PATH_TO_TARGET}"
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+
+            echo "ERROR: Unmapped released paths: $(jq -c . <<<"${UNKNOWN}")" >&2
+            echo 'package_names=[]' >> "${GITHUB_OUTPUT}"
+            exit 1
+          fi
+
+          MATRIX="$(jq -cn --argjson released "${PATHS_RELEASED}" --argjson map "${PATH_TO_TARGET}" \
+            '$released | map({ target: $map[.], tag: "latest" })')"
+
+          echo "package_names=${MATRIX}" >> "${GITHUB_OUTPUT}"
+
+  publish:
     needs: process
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: needs.process.outputs.releases_created == 'true' || needs.process.outputs.prs_created == 'true'
+    if: needs.process.outputs.publish_matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.process.outputs.publish_matrix) }}
     steps:
-      - name: Dispatch publish for releases
-        if: needs.process.outputs.releases_created == 'true'
+      - name: Dispatch publish
         uses: peter-evans/repository-dispatch@bf47d102fdb849e755b0b0023ea3e81a44b6f570 # v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           event-type: publish-package
-          client-payload: '{"tag": "latest"}'
-
-      - name: Dispatch publish for prerelease
-        if: needs.process.outputs.prs_created == 'true'
-        uses: peter-evans/repository-dispatch@bf47d102fdb849e755b0b0023ea3e81a44b6f570 # v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          event-type: publish-package
-          client-payload: '{"tag": "next"}'
+          client-payload: '{"target":"${{ matrix.target }}","tag":"${{ matrix.tag }}"}'

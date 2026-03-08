@@ -28,6 +28,12 @@ jobs:
           auto-install: true
           auto-setup: true
 
+      - name: Validate counter-lib internal-only guardrails
+        run: |
+          grep -q '"private": true' pkgs/libs/counter/package.json
+          moon run counter-lib:package
+          moon run counter-lib:publish
+
       - name: Run Checks
         run: |
           moon run :lint
