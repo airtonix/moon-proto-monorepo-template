@@ -11,10 +11,18 @@ This procedure validates that a repository generated from this template can:
 This procedure is written so a pi-messenger team can execute it reliably.
 
 ## Required Inputs
-- **template_repo**: (optional, default: this repo. use gh cli to discover this).
-- **test_repo_owner**: (optiona, default current owner. (use gh cli to discover).
+
+use gh cli to discover as much of this as possible: 
+
+```sh
+gh repo view --json "name,defaultBranchRef,owner,parent,visibility"
+gh auth status
+```
+
+- **template_repo**: (optional, default: this repo. use `gh cli` to discover this).
+- **test_repo_owner**: (optiona, default current owner. (use `gh auth status` to discover).
 - **test_repo_name** (optional, default `moonrepo-monorepo-smoketest`)
-- **default_branch** (optional, default: same as this repo)
+- **default_branch** (optional, default use `gh cli` to discover this)
 - **visibility** (optional, default: `public`): `public|private`
 - **max_wait_minutes_ci** (optional, default: `30`)
 - **max_wait_minutes_release** (optional, default: `45`)
