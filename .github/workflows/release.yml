@@ -25,6 +25,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      - name: Check release config drift
+        run: |
+          set -euo pipefail
+          .github/tasks/get-release-configs check
+
       - name: PrepareReleasePleaseMode
         id: mode
         run: |
