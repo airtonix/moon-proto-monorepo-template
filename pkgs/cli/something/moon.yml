@@ -15,11 +15,6 @@ tasks:
     script: |
       unset GOROOT
       go test ./...
-  package:
-    outputs:
-      - "dist"
-    script: |
-      echo "packaged"
   publish:
     script: |
       echo "published"

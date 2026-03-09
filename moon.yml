@@ -3,10 +3,6 @@ $schema: "https://moonrepo.dev/schemas/project.json"
 language: bash
 
 tasks:
-  dashboard-dev:
-    command: "moon run dashboard:dev"
-    options:
-      runInCI: false
   lint:
     command: "moon run :lint --affected"
   test:
@@ -15,51 +11,21 @@ tasks:
     command: "moon run :build --affected"
   typecheck:
     command: "moon run :typecheck --affected"
-  package:
-    options:
-      cache: false
+
+  setup:
+    depends_on:
+      - setup_ai
+
+  setup_ai:
     script: |
-      TARGET="${PUBLISH_TARGET:-${1:-all}}"
-      TAG="${PUBLISH_TAG:-${2:-latest}}"
+      #TODO: create array
+      local harnesses=()
+      local skills=()
+      local commands=()
+      harnesses["pi"]=".pi/"
+      skills["pi"]="./pi/skills"
+      commands["pi"]="./pi/prompts"
 
-      if [ "$TARGET" = "all" ]; then
-        for t in dashboard docs-site api-service something-cli hello-lib counter-lib; do
-          PUBLISH_TAG="$TAG" moon run "$t:package"
-        done
-        exit $?
-      fi
-
-      case "$TARGET" in
-        dashboard|docs-site|api-service|something-cli|hello-lib|counter-lib)
-          PUBLISH_TAG="$TAG" moon run "$TARGET:package"
-          ;;
-        *)
-          echo "Unknown package target: '$TARGET'" >&2
-          echo "Allowed targets: all, dashboard, docs-site, api-service, something-cli, hello-lib, counter-lib" >&2
-          exit 1
-          ;;
-      esac
-  publish:
-    options:
-      cache: false
-    script: |
-      TARGET="${PUBLISH_TARGET:-${1:-all}}"
-      TAG="${PUBLISH_TAG:-${2:-latest}}"
-
-      if [ "$TARGET" = "all" ]; then
-        for t in dashboard docs-site api-service something-cli hello-lib counter-lib; do
-          PUBLISH_TAG="$TAG" moon run "$t:publish"
-        done
-        exit $?
-      fi
-
-      case "$TARGET" in
-        dashboard|docs-site|api-service|something-cli|hello-lib|counter-lib)
-          PUBLISH_TAG="$TAG" moon run "$TARGET:publish"
-          ;;
-        *)
-          echo "Unknown publish target: '$TARGET'" >&2
-          echo "Allowed targets: all, dashboard, docs-site, api-service, something-cli, hello-lib, counter-lib" >&2
-          exit 1
-          ;;
-      esac
+      #TODO: for each harness, symlink from
+      #  .agents/commands > commands[name]
+      #  .agents/skills > skills[name]
