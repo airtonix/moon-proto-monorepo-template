@@ -17,10 +17,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # We need full history for branch-aware tooling (moon affected/diff behavior).
+      # Shallow checkout can break base-branch comparisons in CI.
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
+
+      # Ensure the PR base branch ref exists locally so diffing against base is stable.
+      # Without this fetch, some runs can fail with ambiguous base-ref errors.
+      - name: Fetch PR base branch for affected diffing
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}"
 
       - name: Setup Toolchain
         uses: moonrepo/setup-toolchain@8794f0318b9df4a43a5ddc23cefd16f595b423dd # v0
@@ -28,12 +37,15 @@ jobs:
           auto-install: true
           auto-setup: true
 
+      # Guardrail: counter-lib is internal-only and must remain non-publishable externally.
+      # We assert private=true and keep package/publish tasks executable as CI smoke checks.
       - name: Validate counter-lib internal-only guardrails
         run: |
           grep -q '"private": true' pkgs/libs/counter/package.json
           moon run counter-lib:package
           moon run counter-lib:publish
 
+      # Monorepo quality gate for pull requests.
       - name: Run Checks
         run: |
           moon run :lint
