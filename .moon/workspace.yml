@@ -1,5 +1,6 @@
 projects:
   repo: "."
+  agents: ".agents"
   dashboard: "apps/dashboard"
   docs-site: "apps/docs_site"
   api-service: "apps/api_service"

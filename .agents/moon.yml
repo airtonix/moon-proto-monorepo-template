@@ -1,0 +1,7 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: bash
+
+tasks:
+  setup:
+    command: ".moon/task/setup.sh"
