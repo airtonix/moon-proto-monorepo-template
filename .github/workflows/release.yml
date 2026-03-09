@@ -37,7 +37,7 @@ jobs:
               config_file="release-please-config--hotfix.json"
               ;;
             normal)
-              config_file="release-please-config.json"
+              config_file="release-please-config--release.json"
               ;;
             *)
               echo "Unsupported release mode: ${mode}" >&2
