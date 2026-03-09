@@ -40,6 +40,7 @@ This repo uses **proto** to pin and manage tool versions. Tools are defined in `
 ### Conventions
 
 - **Moon tasks over npm scripts**: Use `moon run` for all project tasks. The `no-package-scripts` linter enforces this in `pkgs/*` (libraries/tools). Apps may proxy scripts through moon tasks.
+- **Project layers are explicit**: projects declare `layer` in `moon.yml` (`application`, `library`, or `tool`) so orchestration (like smoke tests) can target only product-bearing projects.
 - **Proto for tool pinning**: All tool versions are declared in `.prototools` and auto-installed by `proto install`.
 - **Git hooks via hk**: Pre-commit hooks run linters and fixers automatically before commit. Configure in `hk.pkl`.
 
@@ -75,36 +76,25 @@ cd pkgs/cli/something && go run . greet world
 - `hello-lib` (Bun package) → GitHub Packages registry
 - `counter-lib` (Bun package) → internal-only (`private: true`), package/publish are explicit no-op success
 
-Root orchestration commands:
+Publish command patterns:
 
 ```bash
-# package all allowed targets
-moon run repo:package
+# package/publish per target directly
+moon run hello-lib:publish
+moon run dashboard:publish
+moon run something-cli:publish
 
-# publish all allowed targets with a tag/channel
-PUBLISH_TARGET=all PUBLISH_TAG=latest moon run repo:publish
-
-# publish a single target
-PUBLISH_TARGET=hello-lib PUBLISH_TAG=latest moon run repo:publish
-
-# unknown target exits non-zero
-PUBLISH_TARGET=not-a-target PUBLISH_TAG=latest moon run repo:publish
+# unknown target fails fast in CI publish workflow validation
+# (workflow_dispatch input: target)
 ```
 
-Lightweight smoke verification (router hardening):
+Smoke verification (local, no deploy side effects):
 
 ```bash
-# all mode still works
-PUBLISH_TARGET=all PUBLISH_TAG=latest moon run repo:package
-
-# single-target mode still works
-PUBLISH_TARGET=hello-lib PUBLISH_TAG=latest moon run repo:publish
-
-# unknown targets must fail (non-zero)
-if PUBLISH_TARGET=not-a-target PUBLISH_TAG=latest moon run repo:publish; then
-  echo "expected failure for unknown target" >&2
-  exit 1
-fi
+# run CI-equivalent quality gates
+moon run :lint
+moon run :test
+moon run :build
 ```
 
 ## GitHub Packages publish configuration (hello-lib)
@@ -126,45 +116,18 @@ moon run hello-lib:package -- latest
 NODE_AUTH_TOKEN=ghp_xxx moon run hello-lib:publish -- next
 ```
 
-## GitHub release assets publish workflow (something-cli)
+## Target publish workflows (current state)
 
-Use `.github/workflows/publish-github-release-assets.yml` to upload `something-cli` archives to GitHub releases.
-This workflow is for release assets only (not npm/GitHub Packages publishing).
+This template currently includes only these root workflows:
+- `.github/workflows/pr.yml`
+- `.github/workflows/release.yml`
+- `.github/workflows/publish.yml`
+- `.github/workflows/pr-title.yml`
+- `.github/workflows/stale.yml`
 
-Required:
-- GitHub token (`github.token`, exposed as `GH_TOKEN` in workflow)
-- Input tag (`latest|next|vX.Y.Z`)
+Project `:publish` tasks for `dashboard`, `docs-site`, `api-service`, and `something-cli` are intentionally skeletal right now (they validate CI flow without performing real external deployments).
 
-## Cloudflare Pages publish configuration (dashboard)
-
-Required for real dashboard deploys (`moon run dashboard:publish -- <tag>` and `.github/workflows/publish-cloudflare-pages.yml`):
-
-- GitHub **secret**: `CLOUDFLARE_ACCOUNT_ID`
-- GitHub **secret**: `CLOUDFLARE_API_TOKEN` (or `CLOUDFLARE_OIDC_TOKEN`)
-- GitHub **repository variable**: `CF_PAGES_PROJECT_NAME`
-
-Optional repository variables:
-
-- `CF_PAGES_PRODUCTION_BRANCH` (default: `master`, used for `tag=latest`)
-- `CF_PAGES_PREVIEW_BRANCH` (default: `next`, used for `tag=next`)
-
-Dry-run without deploy:
-
-```bash
-DEPLOY=false moon run dashboard:publish -- latest
-```
-
-## Cloudflare Workers publish configuration (api-service)
-
-Required for real Worker deploys (`moon run api-service:publish -- <tag> <environment>` and `.github/workflows/publish-cloudflare-workers.yml`):
-
-- GitHub **secret**: `CLOUDFLARE_ACCOUNT_ID`
-- GitHub **secret**: `CLOUDFLARE_API_TOKEN` (or `CLOUDFLARE_OIDC_TOKEN`)
-
-Optional:
-- GitHub **repository variable**: `CF_WORKER_ROUTES`
-
-The workflow supports manual dry-run (`deploy=false`) and deploy mode per Wrangler environment (`preview|staging|production`).
+If you want real deploys later, add dedicated workflows and replace skeletal `:publish` tasks with concrete deploy logic.
 
 ## Notes
 
