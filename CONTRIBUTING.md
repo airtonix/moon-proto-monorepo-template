@@ -75,29 +75,27 @@ npm test
 - Hooks are configured in `hk.pkl` with linters for ESLint, Prettier, Actionlint (GitHub workflows), Pkl, and custom rules
 - Run `hk check` to validate, `hk fix` to auto-fix issues
 
-## Commit conventions
+## Commit and PR title conventions
 
-This project uses **semantic commit messages** (enforced by `pr-title.yml`):
+This project uses **conventional commit messages** and **semantic PR titles**.
+
+- PR title lint is enforced by `.github/workflows/pr-title.yml`.
+- Contributors are expected to keep commit messages in conventional format.
+
+Preferred format:
 
 ```
 <type>(<scope>): <description>
-
-<body>
-
-Closes #<issue>
 ```
 
-**Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
+Optional body/footer are allowed.
 
-**Example:**
-```
-feat(dashboard): add dark mode toggle
+**Allowed types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
 
-Adds a new theme selector to the dashboard UI and persists 
-user preference to localStorage.
-
-Closes #42
-```
+**Examples:**
+- `chore(dashboard): smoke test docs update`
+- `fix(api-service): handle empty request payload`
+- `docs(repo): clarify release workflow behavior`
 
 ## CI Pipeline
 
@@ -146,12 +144,13 @@ Automatically marks/closes stale issues and pull requests on schedule.
 ## Review process
 
 1. Create a feature branch from the repository default branch
-2. Make your changes, commit with semantic messages
+2. Make your changes, commit with conventional commit messages
 3. Push and open a pull request
 4. Ensure PR title follows semantic format (e.g., `feat: add new feature`)
 5. Address any CI failures or review comments
-6. Once approved and CI passes, your PR will be merged to the repository default branch
-7. The release workflow then handles release PR/publish orchestration for configured release branches
+6. PR author owns follow-up until green: fix failing checks, respond to review feedback, and push updates as needed
+7. Once approved and CI passes, your PR will be merged to the repository default branch
+8. The release workflow then handles release PR/publish orchestration for configured release branches
 
 ## Project structure
 
