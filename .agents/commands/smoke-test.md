@@ -11,10 +11,10 @@ This procedure validates that a repository generated from this template can:
 This procedure is written so a pi-messenger team can execute it reliably.
 
 ## Required Inputs
-- **template_repo** (required): `owner/template-repo`
-- **test_repo_owner** (required): org or user that will own the smoke-test repo
-- **test_repo_name** (required): default `moonrepo-monorepo-smoketest`
-- **default_branch** (required): expected repository default branch
+- **template_repo**: (optional, default: this repo. use gh cli to discover this).
+- **test_repo_owner**: (optiona, default current owner. (use gh cli to discover).
+- **test_repo_name** (optional, default `moonrepo-monorepo-smoketest`)
+- **default_branch** (optional, default: same as this repo)
 - **visibility** (optional, default: `public`): `public|private`
 - **max_wait_minutes_ci** (optional, default: `30`)
 - **max_wait_minutes_release** (optional, default: `45`)
