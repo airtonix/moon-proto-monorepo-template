@@ -262,8 +262,11 @@ Use this as a concrete control-flow template.
      - minimal change
      - local checks
      - conventional commit(s)
-     - open PR with semantic title
+     - open PR with label `smoke-test` and semantic PR title type in: `feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`
      - monitor own PR and push fixes until checks are green
+   - **Manager MUST include this exact semantic-title requirement in every subagent prompt** (do not rely on implied conventions).
+   - Recommended required line for every dispatch prompt:
+     - `PR title MUST use semantic type: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert. Titles like "smoke: ..." are invalid.`
    - Manager MUST keep a mapping table:
      - `project -> messenger_task_id -> subagent_run_id -> pr_url`
 
