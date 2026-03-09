@@ -159,15 +159,16 @@ Target repo: `${test_repo_owner}/${test_repo_name}`
    - creating branch `smoke/<project>-change`
    - making a minimal meaningful change in that project
    - running project-local checks/tests
-   - committing and pushing
-   - opening a PR with label `smoke-test`
+   - creating conventional commit message(s)
+   - opening a PR with label `smoke-test` and a semantic PR title (`feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`)
+   - owning the PR until green: monitor checks, resolve failures/review comments, and push fixes as needed
 5. Manager creates one dedicated review-monitor agent that:
    - watches all smoke PRs
    - responds to review comments
-   - pushes fixes until checks are green
+   - coordinates with project subagents to keep PRs green
 6. Manager tracks progress via `pi_messenger` feed/task status and enforces timeouts.
 
-**Pass criteria:** one open PR per smoke-eligible project with successful CI, and every PR was created by a distinct subagent.
+**Pass criteria:** one open PR per smoke-eligible project with successful CI, every PR was created by a distinct subagent, and each PR is actively maintained by its owning subagent until green.
 
 ---
 
@@ -260,8 +261,9 @@ Use this as a concrete control-flow template.
      - branch `smoke/<name>-change`
      - minimal change
      - local checks
-     - commit/push
-     - open PR
+     - conventional commit(s)
+     - open PR with semantic title
+     - monitor own PR and push fixes until checks are green
    - Manager MUST keep a mapping table:
      - `project -> messenger_task_id -> subagent_run_id -> pr_url`
 
