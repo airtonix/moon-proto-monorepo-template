@@ -11,21 +11,6 @@ tasks:
     command: "moon run :build --affected"
   typecheck:
     command: "moon run :typecheck --affected"
-
-  setup:
-    depends_on:
-      - setup_ai
-
-  setup_ai:
+  debug_env:
     script: |
-      #TODO: create array
-      local harnesses=()
-      local skills=()
-      local commands=()
-      harnesses["pi"]=".pi/"
-      skills["pi"]="./pi/skills"
-      commands["pi"]="./pi/prompts"
-
-      #TODO: for each harness, symlink from
-      #  .agents/commands > commands[name]
-      #  .agents/skills > skills[name]
+      env | grep MOON_

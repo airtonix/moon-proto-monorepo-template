@@ -20,3 +20,7 @@ tasks:
   publish:
     script: |
       echo "published"
+
+  debug_env:
+    script: |
+      env | grep MOON_
