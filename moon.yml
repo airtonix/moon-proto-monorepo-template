@@ -11,6 +11,3 @@ tasks:
     command: "moon run :build --affected"
   typecheck:
     command: "moon run :typecheck --affected"
-  debug_env:
-    script: |
-      env | grep MOON_
