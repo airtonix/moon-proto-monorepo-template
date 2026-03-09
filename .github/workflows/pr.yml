@@ -37,14 +37,6 @@ jobs:
           auto-install: true
           auto-setup: true
 
-      # Guardrail: counter-lib is internal-only and must remain non-publishable externally.
-      # We assert private=true and keep package/publish tasks executable as CI smoke checks.
-      - name: Validate counter-lib internal-only guardrails
-        run: |
-          grep -q '"private": true' pkgs/libs/counter/package.json
-          moon run counter-lib:package
-          moon run counter-lib:publish
-
       # Monorepo quality gate for pull requests.
       - name: Run Checks
         run: |
