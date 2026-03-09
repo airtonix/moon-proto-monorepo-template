@@ -4,14 +4,24 @@
   "bump-patch-for-minor-pre-major": true,
   "release-type": "node",
   "packages": {
-    "apps/food-carts": {
+    "apps/api_service": {
       "group": "apps"
     },
-    "apps/back-office": {
+    "apps/dashboard": {
       "group": "apps"
     },
-    "apps/public-website": {
+    "apps/docs_site": {
       "group": "apps"
+    },
+    "pkgs/cli/something": {
+      "group": "pkgs",
+      "release-type": "go"
+    },
+    "pkgs/libs/counter": {
+      "group": "pkgs"
+    },
+    "pkgs/libs/hello": {
+      "group": "pkgs"
     }
   },
   "plugins": [
@@ -20,7 +30,9 @@
     },
     {
       "type": "group-priority",
-      "groups": ["apps"]
+      "groups": [
+        "apps"
+      ]
     }
   ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
