@@ -1,0 +1,16 @@
+$schema: ../../.moon/cache/schemas/template.json
+id: 'app-cloudflare-worker'
+title: 'Cloudflare Worker app'
+description: |
+  Scaffolds a TypeScript Cloudflare Worker app under apps/ with moon build/package/publish tasks.
+destination: '/apps/[name]'
+variables:
+  name:
+    type: 'string'
+    required: true
+    prompt: 'App folder name (apps/<name>)?'
+  serviceName:
+    type: 'string'
+    required: true
+    default: 'api-service'
+    prompt: 'Service name for health payload and Wrangler vars?'

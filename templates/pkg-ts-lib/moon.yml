@@ -1,0 +1,22 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: typescript
+
+toolchains:
+  default: ["javascript", "bun"]
+
+tasks:
+  lint:
+    command: "bunx tsc --noEmit"
+  typecheck:
+    command: "bunx tsc --noEmit"
+  build:
+    command: "bunx tsc -p tsconfig.json"
+    outputs:
+      - "dist"
+  test:
+    command: "bun test"
+
+  publish:
+    script: |
+      echo "published"

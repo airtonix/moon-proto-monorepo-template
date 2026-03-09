@@ -1,0 +1,21 @@
+$schema: ../../.moon/cache/schemas/template.json
+id: 'pkg-ts-lib'
+title: 'TypeScript library (publishable)'
+description: |
+  Scaffolds a publishable TypeScript library under pkgs/libs/ with bun + vitest + moon tasks.
+destination: '/pkgs/libs/[name]'
+variables:
+  name:
+    type: 'string'
+    required: true
+    prompt: 'Library folder name (pkgs/libs/<name>)?'
+  npmScope:
+    type: 'string'
+    required: true
+    default: '@template'
+    prompt: 'NPM scope (for package name)?'
+  exportName:
+    type: 'string'
+    required: true
+    default: 'hello'
+    prompt: 'Exported function name?'

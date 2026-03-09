@@ -1,0 +1,16 @@
+$schema: ../../.moon/cache/schemas/template.json
+id: 'app-tanstack-start'
+title: 'TanStack Start app'
+description: |
+  Scaffolds a TanStack Start application under apps/ with moon tasks and package artifact staging.
+destination: '/apps/[name]'
+variables:
+  name:
+    type: 'string'
+    required: true
+    prompt: 'App folder name (apps/<name>)?'
+  title:
+    type: 'string'
+    required: true
+    default: 'Dashboard'
+    prompt: 'App title?'

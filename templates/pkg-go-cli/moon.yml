@@ -1,0 +1,20 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: go
+
+tasks:
+  lint:
+    script: |
+      unset GOROOT
+      go vet ./...
+  build:
+    script: |
+      unset GOROOT
+      go build ./...
+  test:
+    script: |
+      unset GOROOT
+      go test ./...
+  publish:
+    script: |
+      echo "published"

@@ -1,0 +1,16 @@
+$schema: ../../.moon/cache/schemas/template.json
+id: 'app-docs-site'
+title: 'Static docs app (Vite + React + TanStack Router)'
+description: |
+  Scaffolds a static docs site app under apps/ with deterministic dist/ output and package/publish tasks.
+destination: '/apps/[name]'
+variables:
+  name:
+    type: 'string'
+    required: true
+    prompt: 'App folder name (apps/<name>)?'
+  title:
+    type: 'string'
+    required: true
+    default: 'docs-site'
+    prompt: 'Displayed app title?'

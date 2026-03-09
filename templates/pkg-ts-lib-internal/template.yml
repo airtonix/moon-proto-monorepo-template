@@ -1,0 +1,21 @@
+$schema: ../../.moon/cache/schemas/template.json
+id: 'pkg-ts-lib-internal'
+title: 'TypeScript library (internal-only)'
+description: |
+  Scaffolds an internal-only TypeScript library under pkgs/libs/ with private package metadata.
+destination: '/pkgs/libs/[name]'
+variables:
+  name:
+    type: 'string'
+    required: true
+    prompt: 'Library folder name (pkgs/libs/<name>)?'
+  npmScope:
+    type: 'string'
+    required: true
+    default: '@template'
+    prompt: 'NPM scope (for package name)?'
+  exportName:
+    type: 'string'
+    required: true
+    default: 'inc'
+    prompt: 'Exported function name?'

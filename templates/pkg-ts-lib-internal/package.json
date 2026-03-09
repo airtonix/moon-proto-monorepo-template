@@ -1,0 +1,22 @@
+{
+  "name": "{{ npmScope }}/{{ name }}",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Internal-only TypeScript library scaffold",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

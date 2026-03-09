@@ -1,0 +1,15 @@
+$schema: ../../.moon/cache/schemas/template.json
+id: 'pkg-go-cli'
+title: 'Go CLI package'
+description: |
+  Scaffolds a Go CLI package under pkgs/cli/ with moon lint/build/test/publish tasks.
+destination: '/pkgs/cli/[name]'
+variables:
+  name:
+    type: 'string'
+    required: true
+    prompt: 'CLI folder name (pkgs/cli/<name>)?'
+  modulePath:
+    type: 'string'
+    required: true
+    prompt: 'Go module path (for go.mod)?'

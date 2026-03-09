@@ -11,3 +11,7 @@ projects:
 vcs:
   defaultBranch: "master"
   provider: "github"
+
+generator:
+  templates:
+    - "./templates"

@@ -1,0 +1,43 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+
+language: typescript
+
+toolchains:
+  default: ["javascript", "bun"]
+
+tasks:
+  dev:
+    command: "bun run dev"
+    options:
+      runInCI: false
+
+  typecheck:
+    command: "bun run typecheck"
+
+  build:
+    command: "bun run build"
+    outputs:
+      - "dist"
+
+  package:
+    deps:
+      - "~:build"
+    command: "bash .moon/task/package.sh"
+    outputs:
+      - ".artifacts"
+    options:
+      cache: false
+
+  publish:
+    deps:
+      - "~:package"
+    script: |
+      set -euo pipefail
+      echo "{{ name }} publish skeleton"
+      echo "args: $*"
+      echo "PUBLISH_TARGET: ${PUBLISH_TARGET:-}"
+      echo "PUBLISH_TAG: ${PUBLISH_TAG:-}"
+    outputs:
+      - ".artifacts"
+    options:
+      cache: false
