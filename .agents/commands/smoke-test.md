@@ -14,10 +14,19 @@ This procedure is written so a pi-messenger team can execute it reliably.
 - **template_repo** (required): `owner/template-repo`
 - **test_repo_owner** (required): org or user that will own the smoke-test repo
 - **test_repo_name** (required): default `moonrepo-monorepo-smoketest`
-- **default_branch** (required): expected default branch (e.g. `main`)
+- **default_branch** (required): expected repository default branch
 - **visibility** (optional, default: `public`): `public|private`
 - **max_wait_minutes_ci** (optional, default: `30`)
 - **max_wait_minutes_release** (optional, default: `45`)
+
+### Discover `default_branch` with gh CLI
+Use GitHub as source of truth instead of guessing branch names.
+
+```bash
+gh repo view "${test_repo_owner}/${test_repo_name}" --json defaultBranchRef -q '.defaultBranchRef.name'
+```
+
+Set `default_branch` from that output and use it for all branch-sensitive checks.
 
 ## Hard Constraints
 - You MUST fail fast if `gh`, `git`, `moon`, or `proto` are unavailable.
@@ -126,29 +135,31 @@ Target repo: `${test_repo_owner}/${test_repo_name}`
 1. Generate repo from `${template_repo}` with name `${test_repo_name}`.
 2. Clone locally. Don't use https, use ssh.
 3. Run the `gh-repo-setup-cli` skill for initial setup.
-4. Validate repo default branch equals `${default_branch}`.
-5. Validate `.github/workflows/*.yml` are compatible with `${default_branch}` triggers.
+4. Discover actual default branch via `gh repo view` and set/confirm `${default_branch}` from that value.
+5. Validate repo default branch equals `${default_branch}`.
+6. Validate `.github/workflows/*.yml` are compatible with `${default_branch}` triggers.
 
 **Pass criteria:** repo exists, cloned, setup completed, branch/workflow alignment confirmed.
 
 ---
 
 ### 4) Plan and Launch Parallel Project PRs (Manager + Subagents)
-1. Manager lists moon projects (`moon project:list` or equivalent).
-2. Manager creates one task per project in `pi_messenger`.
-3. For each project task, manager dispatches a separate subagent responsible for:
+1. Manager lists moon projects (`moon query projects`).
+2. Manager filters to smoke-eligible layers: `application`, `library`, `tool`.
+3. Manager creates one task per smoke-eligible project in `pi_messenger`.
+4. For each smoke-eligible project task, manager dispatches a separate subagent responsible for:
    - creating branch `smoke/<project>-change`
    - making a minimal meaningful change in that project
    - running project-local checks/tests
    - committing and pushing
    - opening a PR with label `smoke-test`
-4. Manager creates one dedicated review-monitor agent that:
+5. Manager creates one dedicated review-monitor agent that:
    - watches all smoke PRs
    - responds to review comments
    - pushes fixes until checks are green
-5. Manager tracks progress via `pi_messenger` feed/task status and enforces timeouts.
+6. Manager tracks progress via `pi_messenger` feed/task status and enforces timeouts.
 
-**Pass criteria:** one open PR per project with successful CI, and every PR was created by a distinct subagent.
+**Pass criteria:** one open PR per smoke-eligible project with successful CI, and every PR was created by a distinct subagent.
 
 ---
 
@@ -232,12 +243,12 @@ Use this as a concrete control-flow template.
    - `pi_messenger({ action: "plan", prompt: "Execute .pi/prompts/smoke-test.md with required inputs" })`
 
 2. Discover/prepare project tasks
-   - Manager discovers projects with moon.
-   - For each project `<name>`, manager ensures a messenger task exists (e.g. `task-project-<name>`).
+   - Manager discovers projects with moon and filters layers to `application|library|tool`.
+   - For each smoke-eligible project `<name>`, manager ensures a messenger task exists (e.g. `task-project-<name>`).
    - Manager starts each task: `pi_messenger({ action: "task.start", id: "task-project-<name>" })`.
 
 3. Dispatch parallel subagents (one per project)
-   - For each project `<name>`, manager dispatches one subagent with scope limited to that project task:
+   - For each smoke-eligible project `<name>`, manager dispatches one subagent with scope limited to that project task:
      - branch `smoke/<name>-change`
      - minimal change
      - local checks
