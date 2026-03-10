@@ -1,7 +1,5 @@
 $schema: "https://moonrepo.dev/schemas/project.json"
 
-language: bash
-
 tasks:
   lint:
     command: "moon run :lint --affected"

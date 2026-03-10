@@ -156,19 +156,20 @@ Target repo: `${test_repo_owner}/${test_repo_name}`
 2. Manager filters to smoke-eligible layers: `application`, `library`, `tool`.
 3. Manager creates one task per smoke-eligible project in `pi_messenger`.
 4. For each smoke-eligible project task, manager dispatches a separate subagent responsible for:
-   - creating branch `smoke/<project>-change`
+   - creating branch `fix/<project>-change`
    - making a minimal meaningful change in that project
    - running project-local checks/tests
    - creating conventional commit message(s)
-   - opening a PR with label `smoke-test` and a semantic PR title (`feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`)
-   - owning the PR until green: monitor checks, resolve failures/review comments, and push fixes as needed
+   - opening a PR with a semantic PR title (`fix(<project>): <description>`), make sure pr body is readable markdown. 
+   - owning the PR until green: monitor checks, resolve failures/review comments, and push fixes as needed, change pr title etc.
 5. Manager creates one dedicated review-monitor agent that:
-   - watches all smoke PRs
-   - responds to review comments
+   - watches all created PRs
+   - reviews PRs and leaves comments on PR. each comment has footer: "> ![NOTE]\nFrom: Review Agent."
    - coordinates with project subagents to keep PRs green
 6. Manager tracks progress via `pi_messenger` feed/task status and enforces timeouts.
 
-**Pass criteria:** one open PR per smoke-eligible project with successful CI, every PR was created by a distinct subagent, and each PR is actively maintained by its owning subagent until green.
+**Pass criteria:** one open PR per smoke-eligible project with successful CI, 
+every PR was created by a distinct subagent, and each PR is actively maintained by its owning subagent until green.
 
 ---
 
@@ -226,7 +227,7 @@ At completion, produce:
 Manager session orchestration shape (example):
 - `pi_messenger({ action: "join" })`
 - `pi_messenger({ action: "set_status", message: "smoke-test manager" })`
-- `pi_messenger({ action: "plan", prompt: "Execute .pi/prompts/smoke-test.md with required inputs" })`
+- `pi_messenger({ action: "plan", prompt: "Execute .agents/commands/smoke-test.md with required inputs" })`
 - `pi_messenger({ action: "task.list" })`
 - `pi_messenger({ action: "task.start", id: "task-project-<name>" })` (per project)
 - Manager dispatches one subagent per project task (parallel)
@@ -249,7 +250,7 @@ Use this as a concrete control-flow template.
 1. Join + plan
    - `pi_messenger({ action: "join" })`
    - `pi_messenger({ action: "set_status", message: "running smoke-test manager" })`
-   - `pi_messenger({ action: "plan", prompt: "Execute .pi/prompts/smoke-test.md with required inputs" })`
+   - `pi_messenger({ action: "plan", prompt: "Execute .agents/commands/smoke-test.md with required inputs" })`
 
 2. Discover/prepare project tasks
    - Manager discovers projects with moon and filters layers to `application|library|tool`.
@@ -262,11 +263,12 @@ Use this as a concrete control-flow template.
      - minimal change
      - local checks
      - conventional commit(s)
-     - open PR with label `smoke-test` and semantic PR title type in: `feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`
+     - open PR with a conventional commit pr tile using one of the prefixes in: `feat|fix|docs|style|refactor|perf|test|build|ci|chore`
      - monitor own PR and push fixes until checks are green
    - **Manager MUST include this exact semantic-title requirement in every subagent prompt** (do not rely on implied conventions).
    - Recommended required line for every dispatch prompt:
      - `PR title MUST use semantic type: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert. Titles like "smoke: ..." are invalid.`
+     - If a PR with "smoke" prefix is used, ask the subagent to re title the pr.
    - Manager MUST keep a mapping table:
      - `project -> messenger_task_id -> subagent_run_id -> pr_url`
 
