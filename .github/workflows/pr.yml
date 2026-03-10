@@ -24,12 +24,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Ensure the PR base branch ref exists locally so diffing against base is stable.
-      # Without this fetch, some runs can fail with ambiguous base-ref errors.
-      - name: Fetch PR base branch for affected diffing
-        if: github.event_name == 'pull_request'
-        run: |
-          git fetch origin "${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}"
+      # # Ensure the PR base branch ref exists locally so diffing against base is stable.
+      # # Without this fetch, some runs can fail with ambiguous base-ref errors.
+      # - name: Fetch PR base branch for affected diffing
+      #   if: github.event_name == 'pull_request'
+      #   run: |
+      #     git fetch origin "${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}"
 
       - name: Setup Toolchain
         uses: moonrepo/setup-toolchain@8794f0318b9df4a43a5ddc23cefd16f595b423dd # v0
