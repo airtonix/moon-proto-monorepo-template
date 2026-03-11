@@ -25,10 +25,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Check release config drift
-        run: |
-          set -euo pipefail
-          .github/tasks/get-release-configs check
+      - name: Setup Toolchain
+        uses: moonrepo/setup-toolchain@8794f0318b9df4a43a5ddc23cefd16f595b423dd # v0
+        with:
+          auto-install: true
+          auto-setup: true
 
       - name: PrepareReleasePleaseMode
         id: mode
