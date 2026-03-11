@@ -26,26 +26,49 @@ Do not use when you lack admin permissions for the target repo.
    ```bash
    gh auth status
    gh repo view OWNER/REPO --json name,defaultBranchRef
+   
    ```
 2. **Create repo (if needed)**
    ```bash
    gh repo create OWNER/REPO --private --clone=false --confirm
    ```
-3. **Set merge/repository settings**
+3. **Set repository settings**
+
    ```bash
    gh repo edit OWNER/REPO \
-     --enable-squash-merge \
-     --disable-merge-commit \
-     --disable-rebase-merge \
-     --delete-branch-on-merge
+     --enable-squash-merge true \
+     --enable-merge-commit false \
+     --enable-rebase-merge false \
+     --delete-branch-on-merge true \
+     --enable-wiki false \
+     --enable-auto-merge true \
+     --allow-update-branch true \
    ```
-4. **Set squash commit defaults (API fallback path)**
+4. **Allow workflows to manipulate PRs**
+
+   ```bash
+      # 1) Ensure Actions is enabled for the repo
+      gh api \
+      -X PUT \
+      repos/OWNER/REPO/actions/permissions \
+      -f enabled=true \
+      -f allowed_actions=all
+
+      # 2) Set workflow token default permissions + allow PR approvals
+      gh api \
+      -X PUT \
+      repos/OWNER/REPO/actions/permissions/workflow \
+      -f default_workflow_permissions=write \
+      -F can_approve_pull_request_reviews=true
+   ```
+
+5. **Set squash commit defaults (API fallback path)**
    ```bash
    gh api -X PATCH repos/OWNER/REPO \
      -f squash_merge_commit_title=PR_TITLE \
      -f squash_merge_commit_message=PR_BODY
    ```
-5. **Require PRs on default branch (safe apply)**
+6. **Require PRs on default branch (safe apply)**
    > ⚠️ `PUT /branches/{branch}/protection` is full-replacement style for branch protection. Default path: fetch, merge, then apply. Do not continue on fetch errors except explicit 404 (no existing protection yet).
 
    ```bash
@@ -113,7 +136,3 @@ Do not use when you lack admin permissions for the target repo.
 - `403/404` on protection endpoint: verify admin role and repo visibility.
 - branch not found: fetch default branch from API before applying protection.
 - setting mismatch after apply: check org rulesets and inherited branch protections.
-
-## Test Harness Requirement
-Use `.agents/references/skill-testing/red-green-refactor-harness.md` and attach evidence under `.memory/evidence/task-1b7e2a4d/`.
-Cross-skill matrix reference: `.memory/evidence/task-6acd7f92/validation-matrix.md`.

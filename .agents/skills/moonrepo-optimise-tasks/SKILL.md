@@ -47,6 +47,3 @@ Use this skill to improve task performance safely: measure first, optimize secon
 - Some speed regressions are toolchain/runtime regressions, not moon configuration.
 - A faster run that skips required work is not an optimization; it is a correctness bug.
 
-## Test Harness Requirement
-Use `.agents/references/skill-testing/red-green-refactor-harness.md` and attach evidence under `.memory/evidence/task-3d9a4c6f/`.
-Cross-skill matrix reference: `.memory/evidence/task-6acd7f92/validation-matrix.md`.

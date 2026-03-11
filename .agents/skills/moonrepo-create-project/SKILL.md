@@ -46,6 +46,3 @@ Use this skill when adding a new app/package/service to an existing moon workspa
 - Do not copy task config from unrelated project without pruning stale dependencies.
 - Validate each target right after creation; delayed validation compounds setup mistakes.
 
-## Test Harness Requirement
-Use `.agents/references/skill-testing/red-green-refactor-harness.md` and attach evidence under `.memory/evidence/task-4eab5d70/`.
-Cross-skill matrix reference: `.memory/evidence/task-6acd7f92/validation-matrix.md`.

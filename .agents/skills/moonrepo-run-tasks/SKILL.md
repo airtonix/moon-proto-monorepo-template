@@ -12,6 +12,7 @@ Use this skill for routine execution of moonrepo tasks by project and target, wi
 - Running one project target quickly.
 - Running affected subsets instead of whole repo.
 - Diagnosing common moon task execution failures.
+- Running tasks in CI
 
 ## Core Command Patterns
 1. **Single project target**
@@ -34,6 +35,18 @@ Use this skill for routine execution of moonrepo tasks by project and target, wi
    moon query projects
    moon query tasks app
    ```
+
+## Running Commands in CI
+
+when running tasks in CI, use `ci` instead of `run`.
+
+```bash
+moon ci :lint
+moon ci app:build api:test
+
+moon query projects
+moon query tasks app
+```
 
 ## Triage Flow
 1. **Unknown target/project**
@@ -59,7 +72,3 @@ moon run app:test --affected
 # lint two projects only
 moon run :lint --projects app,dashboard
 ```
-
-## Test Harness Requirement
-Use `.agents/references/skill-testing/red-green-refactor-harness.md` and attach evidence under `.memory/evidence/task-2c8f3b5e/`.
-Cross-skill matrix reference: `.memory/evidence/task-6acd7f92/validation-matrix.md`.
