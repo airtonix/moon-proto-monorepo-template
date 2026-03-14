@@ -33,13 +33,25 @@ require_payload() {
 	fi
 }
 
+moon_project_index() {
+	if command -v moon >/dev/null 2>&1; then
+		if moon projects --json 2>/dev/null | jq -ce 'map({ key: .source, value: .id }) | from_entries' 2>/dev/null; then
+			return 0
+		fi
+	fi
+
+	echo '{}'
+}
+
 cmd_to_manifest() {
 	local payload="${1:-}"
 	local mode="${2:-normal}"
 	local tag="${3:-latest}"
+	local project_index
 	require_payload "$payload"
+	project_index="$(moon_project_index)"
 
-	jq -cn --argjson data "$payload" --arg mode "$mode" --arg tag "$tag" '
+	jq -cn --argjson data "$payload" --argjson project_index "$project_index" --arg mode "$mode" --arg tag "$tag" '
     def released_paths:
       if ($data.paths_released | type) == "string" then
         ($data.paths_released | fromjson? // [])
@@ -51,7 +63,7 @@ cmd_to_manifest() {
 
     released_paths
       | map({
-          target: (split("/")[-1]),
+          target: ($project_index[.] // (split("/")[-1])),
           tag: $tag,
           mode: $mode,
           version: ($data[(. + "--version")] // "")
@@ -61,9 +73,11 @@ cmd_to_manifest() {
 
 cmd_to_appnames() {
 	local payload="${1:-}"
+	local project_index
 	require_payload "$payload"
+	project_index="$(moon_project_index)"
 
-	jq -cn --argjson data "$payload" '
+	jq -cn --argjson data "$payload" --argjson project_index "$project_index" '
     def released_paths:
       if ($data.paths_released | type) == "string" then
         ($data.paths_released | fromjson? // [])
@@ -73,7 +87,7 @@ cmd_to_appnames() {
         []
       end;
 
-    released_paths | map(split("/")[-1])
+    released_paths | map($project_index[.] // split("/")[-1])
   '
 }
 

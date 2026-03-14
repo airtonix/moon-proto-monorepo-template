@@ -46,3 +46,13 @@ setup() {
   [ "$status" -eq 1 ]
   [[ "$output" == *"Invalid JSON payload passed as argv[0]"* ]]
 }
+
+@test "manifest maps release-please paths to moon project ids" {
+  payload='{"paths_released":["apps/api_service","pkgs/libs/hello"],"apps/api_service--version":"1.0.0","pkgs/libs/hello--version":"1.0.0"}'
+
+  run bash "$SCRIPT" manifest "$payload" normal latest
+  [ "$status" -eq 0 ]
+
+  run jq -e '. == [{"target":"api-service","tag":"latest","mode":"normal","version":"1.0.0"},{"target":"hello-lib","tag":"latest","mode":"normal","version":"1.0.0"}]' <<<"$output"
+  [ "$status" -eq 0 ]
+}
