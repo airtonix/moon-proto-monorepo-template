@@ -1,6 +1,6 @@
 {
   "name": "@template/hello",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Example TypeScript library for the moonrepo/bun template",
   "type": "module",
   "exports": {
