@@ -1,4 +1,5 @@
 {
-  "./pkgs/libs/hello": "0.0.1"
+  "./pkgs/libs/hello": "0.0.1",
+  "apps/dashboard": "1.0.0"
 }
 
