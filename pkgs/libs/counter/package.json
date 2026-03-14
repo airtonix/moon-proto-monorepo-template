@@ -1,6 +1,6 @@
 {
   "name": "@template/counter",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "Internal-only counter library",
   "publishConfig": {
