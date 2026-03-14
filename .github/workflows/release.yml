@@ -62,7 +62,7 @@ jobs:
           echo "mode=${mode}" >> "${GITHUB_OUTPUT}"
           echo "config_file=${config_file}" >> "${GITHUB_OUTPUT}"
 
-      - uses: google-github-actions/release-please-action@a017ec70c7f1401744d60197f7577a0c51c8c1cf # v4
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4
         id: release-please
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
