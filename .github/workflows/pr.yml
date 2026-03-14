@@ -32,6 +32,12 @@ jobs:
           auto-install: true
           auto-setup: true
 
+      - name: Restore Moon cache
+        uses: ./.github/actions/moon-cache
+        with:
+          key-prefix: moon-pr
+          cache-version: v1
+
       # Monorepo quality gate for pull requests.
       - name: Run Checks
         run: |
@@ -43,3 +49,6 @@ jobs:
         if: success() || failure()
         with:
           access-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: kymckay/moon-ci-booster@b7018215fa045ad31e25bf5e78a4ffafa05e95f5 #v1.0.1
+        if: success() || failure()

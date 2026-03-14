@@ -37,12 +37,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Toolchain
         uses: moonrepo/setup-toolchain@8794f0318b9df4a43a5ddc23cefd16f595b423dd # v0
         with:
           auto-install: true
           auto-setup: true
+
+      - name: Restore Moon cache
+        uses: ./.github/actions/moon-cache
+        with:
+          key-prefix: moon-publish
+          cache-version: v1
 
       - name: Validate publish target
         run: |
@@ -90,7 +98,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          moon run ${PUBLISH_TARGET}:publish
+          moon ci ${PUBLISH_TARGET}:publish
 
       - name: Publish summary
         if: always()
@@ -114,3 +122,5 @@ jobs:
         with:
           access-token: ${{ github.token }}
           skip-comment: "true"
+
+
